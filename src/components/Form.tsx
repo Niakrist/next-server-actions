@@ -1,27 +1,40 @@
 "use client";
-import React, { useRef } from "react";
+import React, { useActionState, useEffect, useRef } from "react";
 import { createUser } from "@/action/user.action";
+import SubmitButton from "./SubmitButton";
 
 const Form = () => {
   const formRef = useRef<HTMLFormElement>(null);
 
+  const [data, action] = useActionState(createUser, {
+    success: false,
+    message: "",
+  });
+
+  useEffect(() => {
+    if (data.success) {
+      formRef.current?.reset();
+    }
+  }, [data]);
+
   const submitForm = async (data: FormData) => {
-    formRef.current?.reset();
-    await createUser(data);
+    await action(data);
   };
 
   return (
     <form
       ref={formRef}
       action={submitForm}
-      className="w-full max-w-lg bg-wgite p-8 rounded-lg shadow-md">
+      className="w-full max-w-lg bg-wgite p-8 rounded-lg shadow-md"
+    >
       <h2 className="text-2xl font-bold bm-6 text-gray-800">
         Добавить сотрудника
       </h2>
       <div className="mb-4">
         <label
           className="block text-gray-700 text-sm font-bold mb-2"
-          htmlFor="name">
+          htmlFor="name"
+        >
           Имя
         </label>
         <input
@@ -35,7 +48,8 @@ const Form = () => {
       <div className="mb-4">
         <label
           className="block text-gray-700 text-sm font-bold mb-2"
-          htmlFor="email">
+          htmlFor="email"
+        >
           email
         </label>
         <input
@@ -49,7 +63,8 @@ const Form = () => {
       <div className="mb-4">
         <label
           className="block text-gray-700 text-sm font-bold mb-2"
-          htmlFor="password">
+          htmlFor="password"
+        >
           Пароль
         </label>
         <input
@@ -63,7 +78,8 @@ const Form = () => {
       <div className="mb-6">
         <label
           className="block text-gray-700 text-sm font-bold mb-2"
-          htmlFor="confirmPassword">
+          htmlFor="confirmPassword"
+        >
           Повторить пароль
         </label>
         <input
@@ -75,12 +91,12 @@ const Form = () => {
         />
       </div>
       <div className="flex items-center justify-between">
-        <button
-          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4"
-          type="submit">
-          Отправить
-        </button>
+        <SubmitButton className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4" />
       </div>
+      {data?.success && (
+        <p className="text-green-500">Данные успешно добавлены</p>
+      )}
+      {data.message && <p className="text-red-500">{data.message}</p>}
     </form>
   );
 };
